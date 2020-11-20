@@ -34,7 +34,7 @@ function type_check_v2(arg1, arg2)
             case 'enum':
                 let found = false;
                 for (subValue of arg2.enum){
-                    if (!found) found = type_check_v2(arg1, {value: subValue});
+                    found = type_check_v2(arg1, {value: subValue});
                     if (found) break;
                 }
                 if (!found) return false;
@@ -45,22 +45,13 @@ function type_check_v2(arg1, arg2)
 
 function type_check(arg1, arg2)
 {
-    let rep = true;
-
-    if (type_check_v2(arg1, arg2) !== true) rep = false;
+    if (type_check_v2(arg1, arg2) !== true) return false;
     if (arg2['properties'] !== undefined)
         arg2['properties'].forEach(function (e){
-            if (e['type'] !== undefined)
-                if (typeof arg1 !== e['type']) rep = false;
-
-            if (e['value'] !== undefined)
-                if (arg1 != e['value']) rep = false;
-
-            if (e['enum'] !== undefined)
-                if (arg1 !== e['enum'].length) rep = false;
+            if (type_check_v2(arg1[e.keyvol], e) !== true) return false;
         });
 
-    return rep;
+    return true;
 }
 
 // console.log(type_check_v1(1, 'number'));
@@ -68,4 +59,4 @@ function type_check(arg1, arg2)
 // console.log(type_check_v2("foo", {type: 'string', value: 'foo'}));
 // console.log(type_check_v2("foo", {type: 'string', value: 'bar'}));
 // console.log(type_check_v2(3, {enum: ['3',2,3]}));
-// console.log(type_check(["String",5,true], {type: 'Object', properties: {prop1: {type: 'string'}, prop2: {type: 'number', value: 5}, prop3: {type: 'boolean'}}}));
+console.log(type_check(["String",5,true], {type: 'Object', properties: {prop1: {type: 'string'}, prop2: {type: 'number', value: 5}, prop3: {type: 'boolean'}}}));
